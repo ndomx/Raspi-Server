@@ -58,7 +58,7 @@
                     </div>
                     <div class="card-content">
                         <span class="card-title">{{ img }}</span>
-                        <a class="waves-effect waves-light btn"><i class="material-icons right">get_app</i>Download</a>
+                        <a href="{{ url_for('send_imgs', filename=img) }}" download="{{ img }}" class="waves-effect waves-light btn"><i class="material-icons right">get_app</i>Download</a>
                     </div>
                 </div>
             </div>
