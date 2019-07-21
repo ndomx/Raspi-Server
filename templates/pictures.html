@@ -54,11 +54,17 @@
             <div class="col s12 m6">
                 <div class="card">
                     <div class="card-image">
-                        <img src="{{ url_for('send_imgs', filename=img) }}">
+                        <img src="{{ url_for('send_imgs', filename=img.name) }}">
                     </div>
                     <div class="card-content">
-                        <span class="card-title">{{ img }}</span>
-                        <a href="{{ url_for('send_imgs', filename=img) }}" download="{{ img }}" class="waves-effect waves-light btn"><i class="material-icons right">get_app</i>Download</a>
+                        <span class="card-title">{{ img.name }}</span>
+                        <ul>
+                            <li>Size: {{ '{0}KB'.format(img.size) }}</li>
+                            <li>Width: {{ img.width }}</li>
+                            <li>Height: {{ img.height }} </li>
+                            <li>Created: {{ img.ctime }}</li>
+                        </ul>
+                        <a href="{{ url_for('send_imgs', filename=img.name) }}" download="{{ img.name }}" class="waves-effect waves-light btn"><i class="material-icons right">get_app</i>Download</a>
                     </div>
                 </div>
             </div>

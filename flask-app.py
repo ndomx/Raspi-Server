@@ -2,7 +2,7 @@ import os
 import sys
 
 from flask import Flask, render_template, send_from_directory, Response
-from process_imgs import is_valid_img_format
+from process_imgs import is_valid_img_format, get_image_attributes
 
 home_path = '/home/pi/'
 imgs_path = 'E:\\Pictures\\' # home_path + '/Pictures/'
@@ -22,11 +22,14 @@ def display_pictures():
     dirs = []
     files = []
     for path in os.listdir(imgs_path):
-        if os.path.isdir(imgs_path + path):
+        abspath = imgs_path + path
+        if os.path.isdir(abspath):
             dirs.append(path)
-        elif os.path.isfile(imgs_path + path):
+        elif os.path.isfile(abspath):
             if (is_valid_img_format(path)):
-                files.append(path)
+                atts = get_image_attributes(abspath)
+                atts['name'] = path
+                files.append(atts)
 
     return render_template('pictures.html', dirs=dirs, files=files)
 
