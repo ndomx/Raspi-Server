@@ -4,11 +4,13 @@ import sys
 from flask import Flask, render_template, send_from_directory, Response
 from process_imgs import is_valid_img_format, get_image_attributes
 
-home_path = '/home/pi/'
-imgs_path = 'E:\\Pictures\\' # home_path + '/Pictures/'
-videos_path = home_path + '/Videos/'
-music_path = home_path + '/Music/'
-docs_path = home_path + '/Documents/'
+run_on_windows = True
+
+home_path = 'E:\\' if (run_on_windows) else '/home/pi/'
+imgs_path = 'E:\\Pictures\\' if (run_on_windows) else '/home/pi/Pictures/'
+videos_path = 'E:\\Videos\\' if (run_on_windows) else '/home/pi/Videos/'
+music_path = 'E:\\Music\\' if (run_on_windows) else '/home/pi/Music/'
+docs_path = 'E:\\Documents\\' if (run_on_windows) else '/home/pi/Documents/'
 
 app = Flask(__name__)
 
@@ -21,6 +23,7 @@ def index():
 def display_pictures():
     dirs = []
     files = []
+    folder_size = 0
     for path in os.listdir(imgs_path):
         abspath = imgs_path + path
         if os.path.isdir(abspath):
@@ -31,7 +34,28 @@ def display_pictures():
                 atts['name'] = path
                 files.append(atts)
 
-    return render_template('pictures.html', dirs=dirs, files=files)
+                folder_size += atts['size']
+
+    return render_template('pictures.html', dirs=dirs, files=files, folder_size=folder_size)
+
+@app.route('/pictures/<dir_path>')
+def display_pictures_dir(dir_path):
+    dirs = []
+    files = []
+    folder_size = 0
+    for path in os.listdir(imgs_path):
+        abspath = imgs_path + path
+        if os.path.isdir(abspath):
+            dirs.append(path)
+        elif os.path.isfile(abspath):
+            if (is_valid_img_format(path)):
+                atts = get_image_attributes(abspath)
+                atts['name'] = path
+                files.append(atts)
+
+                folder_size += atts['size']
+
+    return render_template('pictures.html', dirs=dirs, files=files, folder_size=folder_size)
 
 @app.route('/music')
 def audios():
