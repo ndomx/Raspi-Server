@@ -29,9 +29,10 @@
             <div class="nav-wrapper">
                 <a href="#" class="brand-logo right">2331A</a>
                 <ul id="nav-mobile" class="left hide-on-med-and-down">
-                    <li><a href="/index">Home</a></li>
+                    <li><a href="/">Home</a></li>
                     <li><a href="/music">Music</a></li>
                     <li class="active"><a href="/pictures">Pictures</a></li>
+                    <li><a href="/docs">Documents</a></li>
                     <li><a><i class="material-icons">search</i></a></li>
                 </ul>
             </div>
@@ -40,7 +41,7 @@
 
     <div class="icon-bar">
         <ul>
-            <li><a><i class="medium material-icons">arrow_back</i></a></li>
+            <li><a href="/"><i class="medium material-icons">arrow_back</i></a></li>
             {% for folder in dirs %}
             <li><a><i class="medium material-icons">folder</i>{{ folder }}</a></li>
             {% endfor %}
@@ -49,6 +50,7 @@
 
 
     <div class="main">
+        <p>{{ files|length }} images ({{ folder_size }}KB)</p>
         {% for img in files %}
         <div class="row">
             <div class="col s12 m6">
@@ -59,7 +61,7 @@
                     <div class="card-content">
                         <span class="card-title">{{ img.name }}</span>
                         <ul>
-                            <li>Size: {{ '{0}KB'.format(img.size) }}</li>
+                            <li>Size: {{ img.size }}KB</li>
                             <li>Width: {{ img.width }}</li>
                             <li>Height: {{ img.height }} </li>
                             <li>Created: {{ img.ctime }}</li>
