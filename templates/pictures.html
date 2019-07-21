@@ -30,9 +30,9 @@
                 <a href="#" class="brand-logo right">2331A</a>
                 <ul id="nav-mobile" class="left hide-on-med-and-down">
                     <li><a href="/">Home</a></li>
-                    <li><a href="/music">Music</a></li>
+                    <li><a href="/music/">Music</a></li>
                     <li class="active"><a href="/pictures">Pictures</a></li>
-                    <li><a href="/docs">Documents</a></li>
+                    <li><a href="/docs/">Documents</a></li>
                     <li><a><i class="material-icons">search</i></a></li>
                 </ul>
             </div>
@@ -43,7 +43,7 @@
         <ul>
             <li><a href="/"><i class="medium material-icons">arrow_back</i></a></li>
             {% for folder in dirs %}
-            <li><a><i class="medium material-icons">folder</i>{{ folder }}</a></li>
+            <li><a href="{{ url_for('display_pictures_dir', dir_path=folder) }}"><i class="medium material-icons">folder</i>{{ folder }}</a></li>
             {% endfor %}
         </ul>
     </div>
