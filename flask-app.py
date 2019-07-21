@@ -1,6 +1,8 @@
 import os
 import sys
-from flask import Flask, request, render_template, send_from_directory
+
+from flask import Flask, render_template, send_from_directory, Response
+from process_imgs import is_valid_img_format
 
 home_path = '/home/pi/'
 imgs_path = 'E:\\Pictures\\' # home_path + '/Pictures/'
@@ -16,14 +18,16 @@ def index():
     return render_template('index.html', files=cdir)
 
 @app.route('/pictures')
-def display_img():
+def display_pictures():
     dirs = []
     files = []
     for path in os.listdir(imgs_path):
         if os.path.isdir(imgs_path + path):
             dirs.append(path)
         elif os.path.isfile(imgs_path + path):
-            files.append(path)
+            if (is_valid_img_format(path)):
+                files.append(path)
+
     return render_template('pictures.html', dirs=dirs, files=files)
 
 @app.route('/music')
