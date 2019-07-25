@@ -14,11 +14,6 @@ docs_path = 'E:\\Documents\\' if (run_on_windows) else '/home/pi/Documents/'
 
 app = Flask(__name__)
 
-@app.route('/test/<path:varargs>')
-def test_path(varargs):
-    v = varargs.split('/')
-    return str(varargs) + ': ' + '/'.join(v)
-
 @app.route('/')
 def index():
     cdir = os.listdir(home_path)
