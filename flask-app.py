@@ -14,6 +14,11 @@ docs_path = 'E:\\Documents\\' if (run_on_windows) else '/home/pi/Documents/'
 
 app = Flask(__name__)
 
+@app.route('/test/<path:varargs>')
+def test_path(varargs):
+    v = varargs.split('/')
+    return str(varargs) + ': ' + '/'.join(v)
+
 @app.route('/')
 def index():
     cdir = os.listdir(home_path)
@@ -21,18 +26,27 @@ def index():
 
 @app.route('/pictures/')
 def display_pictures():
-    return redirect(url_for('display_pictures_dir', dir_path='root'))
+    return redirect(url_for('display_pictures_dir', varargs='root'))
 
-@app.route('/pictures/<dir_path>')
-def display_pictures_dir(dir_path):
+@app.route('/pictures/<path:varargs>')
+def display_pictures_dir(varargs: str):
+    varargs = varargs.strip('/')
+    dir_path = varargs.split('/')
+
     dirs = []
     files = []
     folder_size = 0
-    folder_path = imgs_path if (dir_path == 'root') else imgs_path + dir_path
+    folder_path = imgs_path
+    current = ''
+
+    if ((len(dir_path) > 0) and (dir_path[0] != 'root')):
+        current = varargs + '/'
+        folder_path = imgs_path + current
+
     for path in os.listdir(folder_path):
         abspath = folder_path + path
         if os.path.isdir(abspath):
-            dirs.append(path)
+            dirs.append({'relative': path, 'url': current + path})
         elif os.path.isfile(abspath):
             if (is_valid_img_format(path)):
                 atts = get_image_attributes(abspath)

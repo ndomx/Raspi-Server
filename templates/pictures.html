@@ -41,9 +41,9 @@
 
     <div class="icon-bar">
         <ul>
-            <li><a href="/"><i class="medium material-icons">arrow_back</i></a></li>
+            <li><a href="{{ url_for('display_pictures_dir', varargs=parent) }}"><i class="medium material-icons">arrow_back</i></a></li>
             {% for folder in dirs %}
-            <li><a href="{{ url_for('display_pictures_dir', dir_path=folder) }}"><i class="medium material-icons">folder</i>{{ folder }}</a></li>
+            <li><a href="{{ url_for('display_pictures_dir', varargs=folder.url) }}"><i class="medium material-icons">folder</i>{{ folder.relative }}</a></li>
             {% endfor %}
         </ul>
     </div>
