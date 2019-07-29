@@ -42,7 +42,7 @@ def handle_bad_request(e):
 
 @app.errorhandler(wexs.NotFound)
 def handle_not_found(e):
-    return render_template('404.html', error=HttpError.error404()), 404
+    return render_template('error.html', error=HttpError.error404()), 404
 
 @app.route('/')
 def index():
@@ -65,19 +65,23 @@ def display_pictures(varargs: str = ''):
         current = varargs + '/'
         folder_path = imgs_path + current
 
-    for path in os.listdir(folder_path):
-        abspath = folder_path + path
-        if os.path.isdir(abspath):
-            dirs.append({'relative': path, 'url': current + path})
-        elif os.path.isfile(abspath):
-            if (is_valid_img_format(path)):
-                atts = get_image_attributes(abspath)
-                atts['name'] = path
-                files.append(atts)
+    try:
+        for path in os.listdir(folder_path):
+            abspath = folder_path + path
+            if os.path.isdir(abspath):
+                dirs.append({'relative': path, 'url': current + path})
+            elif os.path.isfile(abspath):
+                if (is_valid_img_format(path)):
+                    atts = get_image_attributes(abspath)
+                    atts['name'] = path
+                    files.append(atts)
 
-                folder_size += atts['size']
+                    folder_size += atts['size']
 
-    return render_template('pictures.html', dirs=dirs, files=files, folder_size=folder_size, current=current)
+        return render_template('pictures.html', dirs=dirs, files=files, folder_size=folder_size, current=current)
+
+    except:
+        raise wexs.NotFound()
 
 @app.route('/pictures/__parent__/')
 @app.route('/pictures/__parent__')
