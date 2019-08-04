@@ -4,7 +4,7 @@ import werkzeug.exceptions as wexs
 
 from flask import Flask, render_template, send_from_directory, redirect, url_for, request, flash
 from werkzeug.utils import secure_filename
-from process_imgs import is_valid_img_format, get_image_attributes
+from filemanager import is_valid_format, get_image_attributes, get_audio_attributes, FileType
 from http_errors import HttpError
 
 run_on_windows = True
@@ -18,19 +18,15 @@ docs_path = 'E:\\Documents\\' if (run_on_windows) else '/home/pi/Documents/'
 invalid_path = '__invalid__'
 parent_path = '__parent__'
 
-app = Flask(__name__)
+roots = {
+    'home': home_path, 
+    'pictures': imgs_path, 
+    'videos': videos_path, 
+    'music': music_path, 
+    'docs': docs_path
+}
 
-def get_root_dir(folder: str)->str:
-    if (folder == 'pictures'):
-        return imgs_path
-    elif (folder == 'videos'):
-        return videos_path
-    elif (folder == 'music'):
-        return music_path
-    elif (folder == 'docs'):
-        return docs_path
-    else:
-        return invalid_path
+app = Flask(__name__)
 
 @app.errorhandler(wexs.Forbidden)
 def handle_forbbiden(e):
@@ -49,9 +45,19 @@ def index():
     cdir = os.listdir(home_path)
     return render_template('index.html', files=cdir)
 
-@app.route('/pictures')
-@app.route('/pictures/')
-@app.route('/pictures/<path:varargs>')
+@app.route('/pictures', methods=['GET', 'POST'])
+@app.route('/pictures/', methods=['GET', 'POST'])
+@app.route('/pictures/<path:varargs>', methods=['GET', 'POST'])
+def picture_folders(varargs: str = ''):
+    if (request.method == 'GET'):
+        return display_pictures(varargs)
+
+    elif (request.method == 'POST'):
+        return upload_file(imgs_path, varargs)
+
+    else:
+        raise wexs.MethodNotAllowed()
+
 def display_pictures(varargs: str = ''):
     varargs = varargs.strip('/')
 
@@ -71,7 +77,7 @@ def display_pictures(varargs: str = ''):
             if os.path.isdir(abspath):
                 dirs.append({'relative': path, 'url': current + path})
             elif os.path.isfile(abspath):
-                if (is_valid_img_format(path)):
+                if (is_valid_format(path, FileType.PICTURE)):
                     atts = get_image_attributes(abspath)
                     atts['name'] = path
                     files.append(atts)
@@ -80,13 +86,13 @@ def display_pictures(varargs: str = ''):
 
         return render_template('pictures.html', dirs=dirs, files=files, folder_size=folder_size, current=current)
 
-    except:
+    except FileNotFoundError:
         raise wexs.NotFound()
 
 @app.route('/pictures/__parent__/')
 @app.route('/pictures/__parent__')
 @app.route('/pictures/__parent__/<path:varargs>')
-def find_parent(varargs: str = '')->str:
+def find_parent_pictures(varargs: str = '')->str:
     print('empty' if (varargs == '') else varargs)
     if (varargs == ''):
         return redirect(url_for('index'))
@@ -95,16 +101,9 @@ def find_parent(varargs: str = '')->str:
     abspath = os.path.abspath(os.path.join(abspath, os.pardir))
     new_path = os.path.relpath(abspath, imgs_path)
 
-    return redirect(url_for('display_pictures', varargs=new_path))
+    return redirect(url_for('picture_folders', varargs=new_path))
 
-@app.route('/uploads/<folder>', methods=['POST'])
-@app.route('/uploads/<folder>/', methods=['POST'])
-@app.route('/uploads/<folder>/<path:save_path>', methods=['POST'])
-def upload_picture(folder: str, save_path: str = ''):
-    root = get_root_dir(folder)
-    if (root == invalid_path):
-        raise wexs.Forbidden()
-
+def upload_file(root: str, save_path: str = ''):
     if ('file' not in request.files):
         flash('No file part')
         return redirect(request.url)
@@ -115,21 +114,83 @@ def upload_picture(folder: str, save_path: str = ''):
         return redirect(request.url)
 
     full_path = os.path.join(root, save_path)
-    if (upload and is_valid_img_format(upload.filename)):
+    if (upload and is_valid_format(upload.filename, FileType.PICTURE)):
         filename = secure_filename(upload.filename)
         upload.save(os.path.join(full_path, filename))
         return redirect(request.url)
 
     raise wexs.BadRequest()
 
+@app.route('/__delete__/<root_folder>')
+def remove_file(root_folder: str):
+    if (root_folder not in roots.keys()):
+        raise wexs.Forbidden()
 
+    if ('filepath' not in request.args.keys()):
+        flash('No file part')
+        return redirect(request.url)
+
+    file_path = request.args['filepath']
+    file_path = file_path.strip('/')
+    if (file_path == ''):
+        flash('No selected file')
+        return redirect(request.url)
+
+    full_path = os.path.join(roots[root_folder], file_path)
+    try:
+        os.remove(full_path)
+        if ('urlpath' not in request.args.keys()):
+            return redirect('/')
+        else:
+            return redirect(request.args['urlpath'])
+
+    except OSError:
+        raise wexs.ServiceUnavailable()
+
+    raise wexs.BadRequest()
+
+@app.route('/music')
 @app.route('/music/')
-def audios():
-    return render_template('audio.html')
+@app.route('/music/<path:varargs>')
+def audios(varargs: str = ''):
+    varargs = varargs.strip('/')
 
-@app.route('/imgs/<filename>/')
+    dirs = []
+    files = []
+    folder_size = 0
+    folder_path = music_path
+    current = ''
+
+    if (varargs != ''):
+        current = varargs + '/'
+        folder_path = music_path + current
+
+    try:
+        for path in os.listdir(folder_path):
+            abspath = folder_path + path
+            if (os.path.isdir(abspath)):
+                dirs.append({'relative': path, 'url': current + path})
+            elif (os.path.isfile(abspath)):
+                if (is_valid_format(path, FileType.AUDIO)):
+                    atts = get_audio_attributes(abspath)
+                    atts['name'] = path
+                    files.append(atts)
+
+                    folder_size += atts['size']
+
+        return render_template('audio.html', dirs=dirs, files=files, folder_size=folder_size, current=current)
+
+    except FileNotFoundError:
+        raise wexs.NotFound()
+    
+
+@app.route('/__pictures__/<filename>/')
 def send_imgs(filename):
     return send_file(imgs_path, filename)
+
+@app.route('/__music__/<filename>/')
+def send_audio(filename):
+    return send_file(music_path, filename)
 
 @app.route('/<path>/<filename>/')
 def send_file(path, filename):
