@@ -1,5 +1,6 @@
 import os
 
+from abc import ABC
 from typing import List, Dict, Tuple, Any
 from PIL import Image
 from datetime import datetime
@@ -10,6 +11,7 @@ class FileType(Enum):
     AUDIO = 1
     VIDEO = 2
     DOCUMENT = 3
+    INVALID = -1   
 
 _img_extensions: Dict[str, str] = {
     '.apng': 'image/png', 
@@ -39,8 +41,8 @@ _audio_extensions: Dict[str, str] = {
 }
 
 _valid_extensions: List[Tuple[FileType, Dict[str, str]]] = [
-    _img_extensions,
-    _audio_extensions
+    (FileType.PICTURE, _img_extensions),
+    (FileType.AUDIO, _audio_extensions)
 ]
 
 def _get_file_extension(filename: str)->str:
@@ -65,7 +67,7 @@ def get_mime_type(filename: str, filetype: FileType)->str:
                 mime = exts[ext]
                 break
 
-    except IndexError as e:
+    except IndexError:
         mime = 'text/plain'
 
     return mime
@@ -84,4 +86,14 @@ def get_image_attributes(abspath: str)->Dict[str, Any]:
         att['height'] = h
 
     return att
-        
+
+def get_audio_attributes(abspath: str)->Dict[str, Any]:
+    att = {}
+    stats = os.stat(abspath)
+    att['size'] = stats.st_size
+    att['ctime'] = datetime.fromtimestamp(stats.st_ctime).strftime('%d-%b-%Y (%H:%M:%S)')
+    att['atime'] = datetime.fromtimestamp(stats.st_atime).strftime('%d-%b-%Y (%H:%M:%S)')
+    att['mtime'] = datetime.fromtimestamp(stats.st_mtime).strftime('%d-%b-%Y (%H:%M:%S)')
+    att['duration'] = 0
+
+    return att
