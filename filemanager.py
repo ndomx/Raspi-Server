@@ -1,10 +1,11 @@
 import os
 
-from abc import ABC
 from typing import List, Dict, Tuple, Any
-from PIL import Image
 from datetime import datetime
 from enum import Enum
+
+from PIL import Image
+from tinytag import TinyTag
 
 class FileType(Enum):
     PICTURE = 0
@@ -90,10 +91,15 @@ def get_image_attributes(abspath: str)->Dict[str, Any]:
 def get_audio_attributes(abspath: str)->Dict[str, Any]:
     att = {}
     stats = os.stat(abspath)
-    att['size'] = stats.st_size
+    att['size'] = stats.st_size / 1024
     att['ctime'] = datetime.fromtimestamp(stats.st_ctime).strftime('%d-%b-%Y (%H:%M:%S)')
     att['atime'] = datetime.fromtimestamp(stats.st_atime).strftime('%d-%b-%Y (%H:%M:%S)')
     att['mtime'] = datetime.fromtimestamp(stats.st_mtime).strftime('%d-%b-%Y (%H:%M:%S)')
-    att['duration'] = 0
+
+    tag = TinyTag.get(abspath)
+    att['duration'] = '{minutes:02d}:{seconds:02d}'.format(minutes=tag.duration // 60, seconds=tag.duration % 60)
+    att['artist'] = tag.artist if (tag.artist is not None) else ''
+    att['album'] = tag.album if (tag.album is not None) else ''
+    att['title'] = tag.title if (tag.title is not None) else ''
 
     return att
