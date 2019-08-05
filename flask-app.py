@@ -138,14 +138,27 @@ def remove_file(root_folder: str):
 
     full_path = os.path.join(roots[root_folder], file_path)
     try:
-        os.remove(full_path)
+        if (os.path.isfile(full_path)):
+            os.remove(full_path)
+
+        elif (os.path.isdir(full_path)):
+            if (run_on_windows):
+                full_path = full_path.replace('/', '\\')
+
+            cmd = ('rmdir /Q /S ' if (run_on_windows) else 'rm -r ') + full_path 
+            os.system(cmd)
+            
+        else:
+            raise OSError('Path is neither a file nor directory')
+
+
         if ('urlpath' not in request.args.keys()):
             return redirect('/')
         else:
             return redirect(request.args['urlpath'])
 
-    except OSError:
-        raise wexs.ServiceUnavailable()
+    except OSError as e:
+        raise wexs.Forbidden(e)
 
     raise wexs.BadRequest()
 

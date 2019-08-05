@@ -51,12 +51,11 @@
         </ul>
     </div>
 
-
     <div class="container">
         <h5>Pictures/{{ current }}</h5>
         <p>{{ files|length }} images ({{ folder_size }}KB)</p>
         <div class="row">
-            <div class="col s9">
+            <div class="col s8">
                 {% for img in files %}
                 <div class="card">
                     <div class="card-image">
@@ -71,16 +70,19 @@
                             <li>Created: {{ img.ctime }}</li>
                         </ul>
                         <div class="row">
-                            <a href="{{ url_for('send_imgs', filename=img.name) }}" download="{{ img.name }}" class="waves-effect waves-light btn"><i class="material-icons right">get_app</i>Download</a>
+                            <a href="{{ url_for('send_imgs', filename=img.name) }}" download="{{ img.name }}"
+                                class="waves-effect waves-light btn"><i
+                                    class="material-icons right">get_app</i>Download</a>
 
-                            <a href="{{ url_for('remove_file', root_folder='pictures') }}?filepath={{ current }}/{{ img.name }}&urlpath={{ url_for('picture_folders', varargs=current) }}" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete</a>
+                            <a href="{{ url_for('remove_file', root_folder='pictures') }}?filepath={{ current }}/{{ img.name }}&urlpath={{ url_for('picture_folders', varargs=current) }}"
+                                class="waves-effect red btn"><i class="material-icons right">delete</i>Delete</a>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
 
-            <div class="section col s3">
+            <div class="section col s4">
                 <h5>Upload a file</h5>
                 <form method="POST" enctype="multipart/form-data">
                     <div class="file-field input-field">
@@ -92,8 +94,11 @@
                             <input class="file-path validate" type="text">
                         </div>
                     </div>
-                    <input class="waves-effect waves-light btn" type="submit" value="Upload">
+                    <input class="waves-effect white btn" type="submit" value="Upload">
                 </form>
+                <br><br>
+                <a href="{{ url_for('remove_file', root_folder='pictures') }}?filepath={{ current }}&urlpath={{ url_for('find_parent_pictures', varargs=current) }}" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete this directory</a>
+
             </div>
         </div>
     </div>
