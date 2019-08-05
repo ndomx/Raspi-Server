@@ -97,9 +97,16 @@ def get_audio_attributes(abspath: str)->Dict[str, Any]:
     att['mtime'] = datetime.fromtimestamp(stats.st_mtime).strftime('%d-%b-%Y (%H:%M:%S)')
 
     tag = TinyTag.get(abspath)
-    att['duration'] = '{minutes:02d}:{seconds:02d}'.format(minutes=tag.duration // 60, seconds=tag.duration % 60)
+
     att['artist'] = tag.artist if (tag.artist is not None) else ''
     att['album'] = tag.album if (tag.album is not None) else ''
     att['title'] = tag.title if (tag.title is not None) else ''
+
+    duration = tag.duration
+    if (duration is None):
+        att['duration'] = 0
+    else:
+        millis = int(1000*duration)
+        att['duration'] = '{mins:02d}:{secs:02d}.{mils:03d}'.format(mins=millis // 60000, secs=millis // 1000, mils=millis % 1000)
 
     return att
