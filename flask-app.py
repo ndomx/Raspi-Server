@@ -4,7 +4,7 @@ import werkzeug.exceptions as wexs
 
 from flask import Flask, render_template, send_from_directory, redirect, url_for, request, flash
 from werkzeug.utils import secure_filename
-from filemanager import is_valid_format, get_image_attributes, get_audio_attributes, FileType
+from filemanager import get_file_extension, is_valid_format, get_image_attributes, get_audio_attributes, FileType
 from http_errors import HttpError
 
 run_on_windows = True
@@ -105,17 +105,26 @@ def find_parent_pictures(varargs: str = '')->str:
 
 def upload_file(root: str, save_path: str = ''):
     if ('file' not in request.files):
-        flash('No file part')
+        # flash('No file part')
         return redirect(request.url)
     
     upload = request.files['file']
     if (upload.filename == ''):
-        flash('No selected file')
+        # flash('No selected file')
         return redirect(request.url)
 
     full_path = os.path.join(root, save_path)
     if (upload and is_valid_format(upload.filename, FileType.PICTURE)):
-        filename = secure_filename(upload.filename)
+        if ('filename' in request.form.keys()):
+            if (request.form['filename'] == ''):
+                filename = secure_filename(upload.filename)
+            else:
+                ext = get_file_extension(upload.filename)
+                filename = secure_filename(request.form['filename'] + ext)
+        else:
+            filename = secure_filename(upload.filename)
+
+        assert filename != ''   
         upload.save(os.path.join(full_path, filename))
         return redirect(request.url)
 
@@ -127,13 +136,13 @@ def remove_file(root_folder: str):
         raise wexs.Forbidden()
 
     if ('filepath' not in request.args.keys()):
-        flash('No file part')
+        # flash('No file part')
         return redirect(request.url)
 
     file_path = request.args['filepath']
     file_path = file_path.strip('/')
     if (file_path == ''):
-        flash('No selected file')
+        # flash('No selected file')
         return redirect(request.url)
 
     full_path = os.path.join(roots[root_folder], file_path)
@@ -147,7 +156,7 @@ def remove_file(root_folder: str):
 
             cmd = ('rmdir /Q /S ' if (run_on_windows) else 'rm -r ') + full_path 
             os.system(cmd)
-            
+
         else:
             raise OSError('Path is neither a file nor directory')
 
@@ -197,7 +206,7 @@ def audios(varargs: str = ''):
         raise wexs.NotFound()
     
 
-@app.route('/__pictures__/<filename>/')
+@app.route('/__pictures__/<path:filename>/')
 def send_imgs(filename):
     return send_file(imgs_path, filename)
 

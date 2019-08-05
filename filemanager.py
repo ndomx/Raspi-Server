@@ -45,12 +45,12 @@ _valid_extensions: List[Tuple[FileType, Dict[str, str]]] = [
     (FileType.AUDIO, _audio_extensions)
 ]
 
-def _get_file_extension(filename: str)->str:
+def get_file_extension(filename: str)->str:
     index = filename.rindex('.')
     return filename[index::]
 
 def is_valid_format(filename: str, filetype: FileType)->bool:
-    ext = _get_file_extension(filename)
+    ext = get_file_extension(filename)
     for (_type, exts) in _valid_extensions:
         if (_type == filetype):
             return (ext in exts.keys())
@@ -59,7 +59,7 @@ def is_valid_format(filename: str, filetype: FileType)->bool:
 
 def get_mime_type(filename: str, filetype: FileType)->str:
     try:
-        ext = _get_file_extension(filename)
+        ext = get_file_extension(filename)
         mime = ''
 
         for (_type, exts) in _valid_extensions:
