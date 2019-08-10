@@ -101,7 +101,7 @@ def find_parent_pictures(varargs: str = '')->str:
     abspath = os.path.abspath(os.path.join(abspath, os.pardir))
     new_path = os.path.relpath(abspath, imgs_path)
 
-    return redirect(url_for('picture_folders', varargs=new_path))
+    return redirect(url_for('picture_folders', varargs=new_path)) 
 
 def upload_file(root: str, save_path: str = ''):
     if ('file' not in request.files):

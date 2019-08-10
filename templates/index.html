@@ -1,27 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    
-    <!-- Icon library -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <link rel="stylesheet" href="{{ url_for('static',filename='styles/index.css') }}">
+    <!-- Icon library -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static',filename='styles/icon-bar.css') }}">
 
     <title>Document</title>
 </head>
+
 <body>
-    <div class="sidebar">
-        <a class="active" href="#home">Home</a>
-        <a href="#news">News</a>
-        <a href="#contact">Contact</a>
-        <a href="#about">About</a>
+    <div class="icon-bar">
+        <a class="active" href="#"><i class="large material-icons">hot_tub</i></a>
+        <a href="#"><i class="large material-icons">3d_rotation</i></a>
+        <a href="#"><i class="large material-icons">ac_unit</i></a>
+        <a href="#"><i class="large material-icons">access_alarm</i></a>
+        <a href="#"><i class="large material-icons">accessibility</i></a>
     </div>
 
     <div>
-
+        <ul>
+            {% for file in files %}
+            <li>{{ file }}</li>
+            {% endfor %}
+        </ul>
     </div>
 </body>
+
 </html>
