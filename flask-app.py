@@ -7,13 +7,11 @@ from werkzeug.utils import secure_filename
 from filemanager import get_file_extension, is_valid_format, get_image_attributes, get_audio_attributes, FileType
 from http_errors import HttpError
 
-run_on_windows = True
-
-home_path = 'E:\\' if (run_on_windows) else '/home/pi/'
-imgs_path = 'E:\\Pictures\\' if (run_on_windows) else '/home/pi/Pictures/'
-videos_path = 'E:\\Videos\\' if (run_on_windows) else '/home/pi/Videos/'
-music_path = 'E:\\Music\\' if (run_on_windows) else '/home/pi/Music/'
-docs_path = 'E:\\Documents\\' if (run_on_windows) else '/home/pi/Documents/'
+home_path = 'D:' + os.sep
+imgs_path = home_path + 'Pictures' + os.sep
+videos_path = home_path + 'Videos' + os.sep
+music_path = home_path + 'Music' + os.sep
+docs_path = home_path + 'Documents' + os.sep
 
 invalid_path = '__invalid__'
 parent_path = '__parent__'
@@ -92,14 +90,15 @@ def display_pictures(varargs: str = ''):
 @app.route('/pictures/__parent__/')
 @app.route('/pictures/__parent__')
 @app.route('/pictures/__parent__/<path:varargs>')
-def find_parent_pictures(varargs: str = '')->str:
-    print('empty' if (varargs == '') else varargs)
+def find_parent_pictures(varargs: str = ''):
     if (varargs == ''):
         return redirect(url_for('index'))
 
     abspath = imgs_path + varargs
     abspath = os.path.abspath(os.path.join(abspath, os.pardir))
+
     new_path = os.path.relpath(abspath, imgs_path)
+    new_path = new_path.replace(os.sep, '/')
 
     return redirect(url_for('picture_folders', varargs=new_path)) 
 
@@ -151,10 +150,9 @@ def remove_file(root_folder: str):
             os.remove(full_path)
 
         elif (os.path.isdir(full_path)):
-            if (run_on_windows):
-                full_path = full_path.replace('/', '\\')
+            full_path = full_path.replace('/', '\\')
 
-            cmd = ('rmdir /Q /S ' if (run_on_windows) else 'rm -r ') + full_path 
+            cmd = 'rmdir /Q /S ' + full_path 
             os.system(cmd)
 
         else:
