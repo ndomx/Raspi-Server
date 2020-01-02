@@ -7,21 +7,21 @@ from werkzeug.utils import secure_filename
 from filemanager import get_file_extension, is_valid_format, get_image_attributes, get_audio_attributes, FileType
 from http_errors import HttpError
 
-home_path = 'D:' + os.sep
-imgs_path = home_path + 'Pictures' + os.sep
-videos_path = home_path + 'Videos' + os.sep
-music_path = home_path + 'Music' + os.sep
-docs_path = home_path + 'Documents' + os.sep
+HOME_PATH = 'D:' + os.sep
+IMGS_PATH = HOME_PATH + 'Pictures' + os.sep
+VIDEOS_PATH = HOME_PATH + 'Videos' + os.sep
+MUSIC_PATH = HOME_PATH + 'Music' + os.sep
+DOCS_PATH = HOME_PATH + 'Documents' + os.sep
 
 invalid_path = '__invalid__'
 parent_path = '__parent__'
 
 roots = {
-    'home': home_path, 
-    'pictures': imgs_path, 
-    'videos': videos_path, 
-    'music': music_path, 
-    'docs': docs_path
+    'home': HOME_PATH, 
+    'pictures': IMGS_PATH, 
+    'videos': VIDEOS_PATH, 
+    'music': MUSIC_PATH, 
+    'docs': DOCS_PATH
 }
 
 app = Flask(__name__)
@@ -40,7 +40,7 @@ def handle_not_found(e):
 
 @app.route('/')
 def index():
-    cdir = os.listdir(home_path)
+    cdir = os.listdir(HOME_PATH)
     return render_template('index.html', files=cdir)
 
 @app.route('/pictures', methods=['GET', 'POST'])
@@ -51,7 +51,7 @@ def picture_folders(varargs: str = ''):
         return display_pictures(varargs)
 
     elif (request.method == 'POST'):
-        return upload_file(imgs_path, varargs)
+        return upload_file(IMGS_PATH, varargs)
 
     else:
         raise wexs.MethodNotAllowed()
@@ -62,12 +62,12 @@ def display_pictures(varargs: str = ''):
     dirs = []
     files = []
     folder_size = 0
-    folder_path = imgs_path
+    folder_path = IMGS_PATH
     current = ''
 
     if (varargs != ''):
         current = varargs + '/'
-        folder_path = imgs_path + current
+        folder_path = IMGS_PATH + current
 
     try:
         for path in os.listdir(folder_path):
@@ -94,10 +94,10 @@ def find_parent_pictures(varargs: str = ''):
     if (varargs == ''):
         return redirect(url_for('index'))
 
-    abspath = imgs_path + varargs
+    abspath = IMGS_PATH + varargs
     abspath = os.path.abspath(os.path.join(abspath, os.pardir))
 
-    new_path = os.path.relpath(abspath, imgs_path)
+    new_path = os.path.relpath(abspath, IMGS_PATH)
     new_path = new_path.replace(os.sep, '/')
 
     return redirect(url_for('picture_folders', varargs=new_path)) 
@@ -178,12 +178,12 @@ def audios(varargs: str = ''):
     dirs = []
     files = []
     folder_size = 0
-    folder_path = music_path
+    folder_path = MUSIC_PATH
     current = ''
 
     if (varargs != ''):
         current = varargs + '/'
-        folder_path = music_path + current
+        folder_path = MUSIC_PATH + current
 
     try:
         for path in os.listdir(folder_path):
@@ -206,11 +206,11 @@ def audios(varargs: str = ''):
 
 @app.route('/__pictures__/<path:filename>/')
 def send_imgs(filename):
-    return send_file(imgs_path, filename)
+    return send_file(IMGS_PATH, filename)
 
 @app.route('/__music__/<filename>/')
 def send_audio(filename):
-    return send_file(music_path, filename)
+    return send_file(MUSIC_PATH, filename)
 
 @app.route('/<path>/<filename>/')
 def send_file(path, filename):
