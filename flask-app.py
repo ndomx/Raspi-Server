@@ -150,7 +150,7 @@ def remove_file(root_folder: str):
             os.remove(full_path)
 
         elif (os.path.isdir(full_path)):
-            full_path = full_path.replace('/', '\\')
+            full_path = full_path.replace('/', os.sep)
 
             cmd = 'rmdir /Q /S ' + full_path 
             os.system(cmd)
