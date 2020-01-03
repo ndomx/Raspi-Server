@@ -12,7 +12,8 @@ class FileType(Enum):
     AUDIO = 1
     VIDEO = 2
     DOCUMENT = 3
-    INVALID = -1   
+    INVALID = -1
+    ANY = -2   
 
 _img_extensions: Dict[str, str] = {
     '.apng': 'image/png', 
@@ -50,8 +51,13 @@ def get_file_extension(filename: str)->str:
     index = filename.rindex('.')
     return filename[index::]
 
-def is_valid_format(filename: str, filetype: FileType)->bool:
+def is_valid_format(filename: str, filetype: FileType = FileType.ANY)->bool:
     ext = get_file_extension(filename)
+    if (filetype == FileType.ANY):
+        for (_, exts) in _valid_extensions:
+            if (ext in exts.keys()):
+                return True
+
     for (_type, exts) in _valid_extensions:
         if (_type == filetype):
             return (ext in exts.keys())

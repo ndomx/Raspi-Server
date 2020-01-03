@@ -172,7 +172,7 @@ def upload_file(root: str, save_path: str = ''):
         return redirect(request.url)
 
     full_path = os.path.join(root, save_path)
-    if (upload and is_valid_format(upload.filename, FileType.PICTURE)):
+    if (upload and is_valid_format(upload.filename, FileType.ANY)):
         if ('filename' in request.form.keys()):
             if (request.form['filename'] == ''):
                 filename = secure_filename(upload.filename)
