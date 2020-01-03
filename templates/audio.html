@@ -61,6 +61,8 @@
                     <audio controls>
                         <source src="{{ url_for('send_audio', filename=current+audio.name) }}" type="{{ audio.mime }}">
                     </audio>
+                    <br>
+                    <a href="{{ url_for('remove_file', root_folder='music') }}?filepath={{ current }}/{{ audio.name }}&urlpath={{ url_for('music_folders', varargs=current) }}" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete</a>
                 </li>
                 {% endfor %}
             </ul>
