@@ -56,6 +56,50 @@ def picture_folders(varargs: str = ''):
     else:
         raise wexs.MethodNotAllowed()
 
+@app.route('/music', methods=['GET', 'POST'])
+@app.route('/music/', methods=['GET', 'POST'])
+@app.route('/music/<path:varargs>', methods=['GET', 'POST'])
+def music_folders(varargs: str = ''):
+    if (request.method == 'GET'):
+        return display_music(varargs)
+    elif (request.method == 'POST'):
+        return upload_file(MUSIC_PATH, varargs)
+    else:
+        raise wexs.MethodNotAllowed()
+
+def display_music(varargs: str = ''):
+    varargs = varargs.strip('/')
+
+    dirs = []
+    files = []
+    folder_size = 0
+    folder_path = MUSIC_PATH
+    current = ''
+
+    if (varargs != ''):
+        current = varargs + '/'
+        folder_path = MUSIC_PATH + current
+
+    try:
+        for path in os.listdir(folder_path):
+            abspath = folder_path + path
+
+            if os.path.isdir(abspath):
+                dirs.append({'relative': path, 'url': current + path})
+
+            elif os.path.isfile(abspath):
+                if (is_valid_format(path, FileType.AUDIO)):
+                    atts = get_audio_attributes(abspath)
+                    atts['name'] = path
+                    files.append(atts)
+
+                    folder_size += atts['size']
+        
+        return render_template('audio.html', dirs=dirs, files=files, folder_size=folder_size, current=current)
+
+    except FileNotFoundError:
+        raise wexs.NotFound()
+
 def display_pictures(varargs: str = ''):
     varargs = varargs.strip('/')
 
@@ -100,7 +144,22 @@ def find_parent_pictures(varargs: str = ''):
     new_path = os.path.relpath(abspath, IMGS_PATH)
     new_path = new_path.replace(os.sep, '/')
 
-    return redirect(url_for('picture_folders', varargs=new_path)) 
+    return redirect(url_for('picture_folders', varargs=new_path))
+
+@app.route('/music/__parent__/')
+@app.route('/music/__parent__')
+@app.route('/music/__parent__/<path:varargs>')
+def find_parent_music(varargs: str = ''):
+    if (varargs == ''):
+        return redirect(url_for('index'))
+
+    abspath = MUSIC_PATH + varargs
+    abspath = os.path.abspath(os.path.join(abspath, os.pardir))
+
+    new_path = os.path.relpath(abspath, MUSIC_PATH)
+    new_path = new_path.replace(os.sep, '/')
+
+    return redirect(url_for('music_folders', varargs=new_path)) 
 
 def upload_file(root: str, save_path: str = ''):
     if ('file' not in request.files):
@@ -203,12 +262,11 @@ def audios(varargs: str = ''):
     except FileNotFoundError:
         raise wexs.NotFound()
     
-
 @app.route('/__pictures__/<path:filename>/')
 def send_imgs(filename):
     return send_file(IMGS_PATH, filename)
 
-@app.route('/__music__/<filename>/')
+@app.route('/__music__/<path:filename>/')
 def send_audio(filename):
     return send_file(MUSIC_PATH, filename)
 
