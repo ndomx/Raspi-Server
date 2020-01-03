@@ -91,7 +91,7 @@ def get_image_attributes(abspath: str)->Dict[str, Any]:
 def get_audio_attributes(abspath: str)->Dict[str, Any]:
     att = {}
     stats = os.stat(abspath)
-    att['size'] = stats.st_size / 1024
+    att['size'] = round(stats.st_size / 1_048_576, 1)
     att['ctime'] = datetime.fromtimestamp(stats.st_ctime).strftime('%d-%b-%Y (%H:%M:%S)')
     att['atime'] = datetime.fromtimestamp(stats.st_atime).strftime('%d-%b-%Y (%H:%M:%S)')
     att['mtime'] = datetime.fromtimestamp(stats.st_mtime).strftime('%d-%b-%Y (%H:%M:%S)')
