@@ -138,6 +138,16 @@ def get_video_attributes(abspath: str)->Dict[str, Any]:
     att['width'] = w
     att['height'] = h
     att['resolution'] = F'{w}x{h}'
-    att['duration'] = clip.duration
+
+    d = int(clip.duration)
+    hours = d // 3_600
+
+    d %= 3_600
+    minutes = d // 60
+
+    d %= 60
+    seconds = d 
+
+    att['duration'] = F'{hours:02d}:{minutes:02d}:{seconds:02d}'
 
     return att
