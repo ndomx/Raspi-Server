@@ -6,6 +6,7 @@ from enum import Enum
 
 from PIL import Image
 from tinytag import TinyTag
+from moviepy.editor import VideoFileClip
 
 class FileType(Enum):
     PICTURE = 0
@@ -42,9 +43,15 @@ _audio_extensions: Dict[str, str] = {
     '.flac': 'audio/flac'
 }
 
+_video_extensions: Dict[str, str] = {
+    '.mp4': 'video/mp4',
+    '.webm': 'video/webm',
+    '.ogg': 'video/ogg'
+}
+
 _valid_extensions: List[Tuple[FileType, Dict[str, str]]] = [
     (FileType.PICTURE, _img_extensions),
-    (FileType.AUDIO, _audio_extensions)
+    (FileType.VIDEO, _video_extensions)
 ]
 
 def get_file_extension(filename: str)->str:
@@ -114,5 +121,23 @@ def get_audio_attributes(abspath: str)->Dict[str, Any]:
     else:
         millis = int(1000*duration)
         att['duration'] = '{mins:02d}:{secs:02d}.{mils:03d}'.format(mins=millis // 60000, secs=millis // 1000, mils=millis % 1000)
+
+    return att
+
+def get_video_attributes(abspath: str)->Dict[str, Any]:
+    att = {}
+    stats = os.stat(abspath)
+    att['size'] = round(stats.st_size / 1_048_576, 1)
+    att['ctime'] = datetime.fromtimestamp(stats.st_ctime).strftime('%d-%b-%Y (%H:%M:%S)')
+    att['atime'] = datetime.fromtimestamp(stats.st_atime).strftime('%d-%b-%Y (%H:%M:%S)')
+    att['mtime'] = datetime.fromtimestamp(stats.st_mtime).strftime('%d-%b-%Y (%H:%M:%S)')
+
+    clip = VideoFileClip(abspath)
+    w, h = clip.size
+
+    att['width'] = w
+    att['height'] = h
+    att['resolution'] = F'{w}x{h}'
+    att['duration'] = clip.duration
 
     return att

@@ -4,7 +4,7 @@ import werkzeug.exceptions as wexs
 
 from flask import Flask, render_template, send_from_directory, redirect, url_for, request, flash
 from werkzeug.utils import secure_filename
-from filemanager import get_file_extension, is_valid_format, get_image_attributes, get_audio_attributes, FileType
+from filemanager import FileType, get_file_extension, is_valid_format, get_image_attributes, get_audio_attributes, get_video_attributes
 from http_errors import HttpError
 
 HOME_PATH = 'D:' + os.sep
@@ -67,6 +67,17 @@ def music_folders(varargs: str = ''):
     else:
         raise wexs.MethodNotAllowed()
 
+@app.route('/videos', methods=['GET', 'POST'])
+@app.route('/videos/', methods=['GET', 'POST'])
+@app.route('/videos/<path:varargs>', methods=['GET', 'POST'])
+def video_folders(varargs: str = ''):
+    if (request.method == 'GET'):
+        return display_videos(varargs)
+    elif (request.method == 'POST'):
+        return upload_file(VIDEOS_PATH, varargs)
+    else:
+        raise wexs.MethodNotAllowed()
+
 def display_music(varargs: str = ''):
     varargs = varargs.strip('/')
 
@@ -96,6 +107,39 @@ def display_music(varargs: str = ''):
                     folder_size += atts['size']
         
         return render_template('audio.html', dirs=dirs, files=files, folder_size=folder_size, current=current)
+
+    except FileNotFoundError:
+        raise wexs.NotFound()
+
+def display_videos(varargs: str = ''):
+    varargs = varargs.strip('/')
+
+    dirs = []
+    files = []
+    folder_size = 0
+    folder_path = VIDEOS_PATH
+    current = ''
+
+    if (varargs != ''):
+        current = varargs + '/'
+        folder_path = VIDEOS_PATH + current
+
+    try:
+        for path in os.listdir(folder_path):
+            abspath = folder_path + path
+            if os.path.isdir(abspath):
+                dirs.append({'relative': path, 'url': current + path})
+            
+            elif os.path.isfile(abspath):
+                if (is_valid_format(path, FileType.VIDEO)):
+                    atts = get_video_attributes(abspath)
+                    atts['name'] = path
+                    
+                    files.append(atts)
+
+                    folder_size += atts['size']
+        
+        return render_template('videos.html', dirs=dirs, files=files, folder_size=folder_size, current=current)
 
     except FileNotFoundError:
         raise wexs.NotFound()
@@ -160,6 +204,21 @@ def find_parent_music(varargs: str = ''):
     new_path = new_path.replace(os.sep, '/')
 
     return redirect(url_for('music_folders', varargs=new_path)) 
+
+@app.route('/videos/__parent__/')
+@app.route('/videos/__parent__')
+@app.route('/videos/__parent__/<path:varargs>')
+def find_parent_videos(varargs: str = ''):
+    if (varargs == ''):
+        return redirect(url_for('index'))
+
+    abspath = VIDEOS_PATH + varargs
+    abspath = os.path.abspath(os.path.join(abspath, os.pardir))
+
+    new_path = os.path.relpath(abspath, VIDEOS_PATH)
+    new_path = new_path.replace(os.sep, '/')
+
+    return redirect(url_for('video_folders', varargs=new_path))
 
 def upload_file(root: str, save_path: str = ''):
     if ('file' not in request.files):
@@ -269,6 +328,10 @@ def send_imgs(filename):
 @app.route('/__music__/<path:filename>/')
 def send_audio(filename):
     return send_file(MUSIC_PATH, filename)
+
+@app.route('/__videos__/<path:filename>')
+def send_video(filename):
+    return send_file(VIDEOS_PATH, filename)
 
 @app.route('/<path>/<filename>/')
 def send_file(path, filename):
