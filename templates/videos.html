@@ -63,7 +63,7 @@
                     <div class="row">
                         <a href="{{ url_for('send_video', filename=current+video.name) }}" download="{{ video.name }}" class="waves-effect waves-light btn"><i class="material-icons right">get_app</i>Download</a>
 
-                        <a href="{{ url_for('remove_file', root_folder='videos') }}?filepath={{ current }}/{{ video.name}}&url_path={{ url_for('video_folders', varargs=current) }}" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete</a>
+                        <a href="{{ url_for('remove_file', root_folder='videos') }}?filepath={{ current }}/{{ video.name}}&urlpath={{ url_for('video_folders', varargs=current) }}" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete</a>
                     </div>
                 </div>
             </div>
