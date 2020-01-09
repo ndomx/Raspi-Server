@@ -5,30 +5,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>2331A</title>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
     <!-- Icon library -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-    <link rel="stylesheet" href="{{ url_for('static',filename='styles/icon-bar.css') }}">
-
-    <title>Document</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 
 <body>
-    <div class="icon-bar">
-        <a class="active" href="#"><i class="large material-icons">hot_tub</i></a>
-        <a href="#"><i class="large material-icons">3d_rotation</i></a>
-        <a href="#"><i class="large material-icons">ac_unit</i></a>
-        <a href="#"><i class="large material-icons">access_alarm</i></a>
-        <a href="#"><i class="large material-icons">accessibility</i></a>
-    </div>
-
-    <div>
-        <ul>
-            {% for file in files %}
-            <li>{{ file }}</li>
-            {% endfor %}
-        </ul>
+    <div class="navbar-fixed">
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo right">2331A</a>
+                <ul class="left hide-on-med-and-down" id="nav-mobile">
+                    <li class="active"><a href="/">Home</a></li class="active">
+                    <li><a href="/music/">Music</a></li>
+                    <li><a href="/pictures/">Pictures</a></li>
+                    <li><a href="/videos/">Videos</a></li>
+                    <li><a href="/docs/">Documents</a></li>
+                    <li><a><i class="material-icons">search</i></a></li>
+                </ul>
+            </div>
+        </nav>
     </div>
 </body>
 
