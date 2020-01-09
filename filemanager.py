@@ -12,9 +12,8 @@ class FileType(Enum):
     PICTURE = 0
     AUDIO = 1
     VIDEO = 2
-    DOCUMENT = 3
-    INVALID = -1
-    ANY = -2   
+    ANY = 3
+    INVALID = -1  
 
 _img_extensions: Dict[str, str] = {
     '.apng': 'image/png', 
@@ -149,5 +148,16 @@ def get_video_attributes(abspath: str)->Dict[str, Any]:
     seconds = d 
 
     att['duration'] = F'{hours:02d}:{minutes:02d}:{seconds:02d}'
+
+    return att
+
+def get_docs_attributes(abspath: str)->Dict[str, Any]:
+    att = {}
+    stats = os.stat(abspath)
+
+    att['size'] = round(stats.st_size / 1_048_576, 1)
+    att['ctime'] = datetime.fromtimestamp(stats.st_ctime).strftime('%d-%b-%Y (%H:%M:%S)')
+    att['atime'] = datetime.fromtimestamp(stats.st_atime).strftime('%d-%b-%Y (%H:%M:%S)')
+    att['mtime'] = datetime.fromtimestamp(stats.st_mtime).strftime('%d-%b-%Y (%H:%M:%S)')
 
     return att
