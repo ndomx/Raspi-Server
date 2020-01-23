@@ -1,163 +1,207 @@
 import os
 
+from abc import ABC, abstractmethod
+
 from typing import List, Dict, Tuple, Any
-from datetime import datetime
-from enum import Enum
+from enum import unique, IntEnum
 
 from PIL import Image
 from tinytag import TinyTag
 from moviepy.editor import VideoFileClip
 
-class FileType(Enum):
-    PICTURE = 0
-    AUDIO = 1
-    VIDEO = 2
-    ANY = 3
-    INVALID = -1  
+@unique
+class FileType(IntEnum):
+    PICTURE = 1
+    AUDIO = 2
+    VIDEO = 3
+    OTHER = 0
 
-_img_extensions: Dict[str, str] = {
-    '.apng': 'image/png', 
-    '.bmp': 'image/bmp', 
-    '.gif': 'image/gif', 
-    '.ico': 'image/ico', 
-    '.jpg': 'image/jpg', 
-    '.jpeg': 'image/jpg', 
-    '.jfif': 'image/jpg', 
-    '.pjpeg': 'image/jpg', 
-    '.pjp': 'image/jpg', 
-    '.png': 'image/png', 
-    '.svg': 'image/svg', 
-    '.tiff': 'image/tif', 
-    '.tif': 'image/tif', 
-    '.webp': 'image/webp', 
-    '.xbm': 'image/xbm'
-}
+class _File(ABC):
+    
+    name = ''
+    ctime = ''
+    atime = ''
+    mtime = ''
+    size = 0
 
-_audio_extensions: Dict[str, str] = {
-    '.wav': 'audio/wav',
-    '.mp3': 'audio/mpeg',
-    '.mp4': 'audio/mp4',
-    '.aac': 'audio/aac',
-    '.ogg': 'audio/ogg',
-    '.flac': 'audio/flac'
-}
+    filetype = FileType.OTHER
+    extensions: List[str] = []
 
-_video_extensions: Dict[str, str] = {
-    '.mp4': 'video/mp4',
-    '.webm': 'video/webm',
-    '.ogg': 'video/ogg'
-}
+    @property
+    def extension(self)->str:
+        index = self.name.rindex('.')
+        return self.name[index::]
 
-_valid_extensions: List[Tuple[FileType, Dict[str, str]]] = [
-    (FileType.PICTURE, _img_extensions),
-    (FileType.VIDEO, _video_extensions)
-]
+    @property
+    @abstractmethod
+    def mime_type(self)->str:
+        pass
 
-def get_file_extension(filename: str)->str:
+    @staticmethod
+    @abstractmethod
+    def from_abspath(abspath: str):
+        pass
+
+    def __str__(self):
+        return self.name
+
+class AnyFile(_File):
+    def mime_type(self)->str:
+        return 'text/plain'
+
+    def from_abspath(abspath: str)->_File:
+        if not os.path.isfile:
+            raise FileNotFoundError('path not set to directory')
+
+        file = AnyFile()
+        file.name = os.path.split(abspath)[-1]
+
+        stats = os.stat(abspath)
+        file.size = stats.st_size
+        file.ctime = stats.st_ctime
+        file.atime = stats.st_atime
+        file.mtime = stats.st_mtime
+
+        return file
+
+class VideoFile(_File):
+
+    width = 0
+    height = 0
+    duration = 0
+
+    filetype = FileType.VIDEO
+    extensions = ['.mp4', '.webm', '.ogg']
+
+    def mime_type(self)->str:
+        return F'video/{self.extension}'
+
+    def from_abspath(abspath: str)->_File:
+        if not os.path.isfile:
+            raise FileNotFoundError('path not set to directory')
+
+        video = VideoFile()
+        video.name = os.path.split(abspath)[-1]
+
+        stats = os.stat(abspath)
+        video.size = stats.st_size
+        video.ctime = stats.st_ctime
+        video.atime = stats.st_atime
+        video.mtime = stats.st_mtime
+
+        clip = VideoFileClip(abspath)
+        width, height = clip.size
+        video.width = width
+        video.height = height
+        video.duration = clip.duration
+
+        return video
+
+class AudioFile(_File):
+
+    artist = ''
+    album = ''
+    title = ''
+    year = 0
+    duration = 0
+
+    filetype = FileType.AUDIO
+    extensions = [
+        '.wav', '.mp3', '.mp4',
+        '.aac', '.ogg', '.flac'
+    ]
+
+    def mime_type(self)->str:
+        return F'audio/{self.extension}'
+
+    def from_abspath(abspath: str)->_File:
+        if not os.path.isfile:
+            raise FileNotFoundError('path not set to directory')
+
+        audio = AudioFile()
+        audio.name = os.path.split(abspath)[-1]
+
+        stats = os.stat(abspath)
+        audio.size = stats.st_size
+        audio.ctime = stats.st_ctime
+        audio.atime = stats.st_atime
+        audio.mtime = stats.st_mtime
+
+        tag = TinyTag.get(abspath)
+
+        audio.artist = tag.artist if (tag.artist is not None) else ''
+        audio.album = tag.album if (tag.album is not None) else ''
+        audio.title = tag.title if (tag.title is not None) else ''
+        audio.year = tag.year if (tag.year is not None) else 0
+        audio.duration = tag.duration if (tag.duration is not None) else 0
+
+        return audio
+
+class PictureFile(_File):
+
+    width = ''
+    height = ''
+
+    filetype = FileType.PICTURE
+    extensions = [
+        '.apng', '.bmp', '.gif', '.ico', '.jpg', '.jpeg',
+        '.jfif', '.pjpeg', '.pjp', '.png', '.svg', 
+        '.tiff', '.tif', '.webp', '.xbm' 
+    ]
+
+    def mime_type(self)->str:
+        ext = ''
+        if (self.extension == '.apng'):
+            ext = 'png'
+        elif (self.extension in ('.jpeg', '.jfif', '.pjpeg', '.pjp')):
+            ext = 'jpg'
+        elif (self.extension == '.tiff'):
+            ext = 'tif'
+        else:
+            ext = self.extension
+
+        return F'image/{ext}'
+
+    def from_abspath(abspath: str)->_File:
+        if not os.path.isfile:
+            raise FileNotFoundError('path not set to directory')
+
+        img = PictureFile()
+        img.name = os.path.split(abspath)[-1]
+
+        stats = os.stat(abspath)
+        img.size = stats.st_size
+
+        # datetime.fromtimestamp(stats.st_ctime).strftime('%d-%b-%Y (%H:%M:%S)')
+        img.ctime = stats.st_ctime
+        img.atime = stats.st_atime
+        img.mtime = stats.st_mtime
+
+        with Image.open(abspath) as _img:
+            width, height = _img.size
+            img.width = width
+            img.height = height
+
+        return img
+
+def _get_extension(abspath: str)->str:
+    filename = os.path.split(abspath)
     index = filename.rindex('.')
-    return filename[index::]
+    return filename[rindex::]
 
-def is_valid_format(filename: str, filetype: FileType = FileType.ANY)->bool:
-    ext = get_file_extension(filename)
-    if (filetype == FileType.ANY):
-        for (_, exts) in _valid_extensions:
-            if (ext in exts.keys()):
-                return True
+def file_from_abspath(abspath: str)->_File:
+    if not os.path.isfile:
+        raise FileNotFoundError('path not set to directory')
 
-    for (_type, exts) in _valid_extensions:
-        if (_type == filetype):
-            return (ext in exts.keys())
+    filename = os.path.split(abspath)[-1]
+    rindex = filename.rindex('.')
+    ext = filename[rindex::]
 
-    return False
-
-def get_mime_type(filename: str, filetype: FileType)->str:
-    try:
-        ext = get_file_extension(filename)
-        mime = ''
-
-        for (_type, exts) in _valid_extensions:
-            if (_type == filetype):
-                mime = exts[ext]
-                break
-
-    except IndexError:
-        mime = 'text/plain'
-
-    return mime
-
-def get_image_attributes(abspath: str)->Dict[str, Any]:
-    att = {}
-    stats = os.stat(abspath)
-    att['size'] = stats.st_size
-    att['ctime'] = datetime.fromtimestamp(stats.st_ctime).strftime('%d-%b-%Y (%H:%M:%S)')
-    att['atime'] = datetime.fromtimestamp(stats.st_atime).strftime('%d-%b-%Y (%H:%M:%S)')
-    att['mtime'] = datetime.fromtimestamp(stats.st_mtime).strftime('%d-%b-%Y (%H:%M:%S)')
-
-    with Image.open(abspath) as img:
-        w, h = img.size
-        att['width'] = w
-        att['height'] = h
-
-    return att
-
-def get_audio_attributes(abspath: str)->Dict[str, Any]:
-    att = {}
-    stats = os.stat(abspath)
-    att['size'] = round(stats.st_size / 1_048_576, 1)
-    att['ctime'] = datetime.fromtimestamp(stats.st_ctime).strftime('%d-%b-%Y (%H:%M:%S)')
-    att['atime'] = datetime.fromtimestamp(stats.st_atime).strftime('%d-%b-%Y (%H:%M:%S)')
-    att['mtime'] = datetime.fromtimestamp(stats.st_mtime).strftime('%d-%b-%Y (%H:%M:%S)')
-
-    tag = TinyTag.get(abspath)
-
-    att['artist'] = tag.artist if (tag.artist is not None) else ''
-    att['album'] = tag.album if (tag.album is not None) else ''
-    att['title'] = tag.title if (tag.title is not None) else ''
-
-    duration = tag.duration
-    if (duration is None):
-        att['duration'] = 0
+    if (ext in PictureFile.extensions):
+        return PictureFile.from_abspath(abspath)
+    elif (ext in AudioFile.extensions):
+        return AudioFile.from_abspath(abspath)
+    elif (ext in VideoFile.extensions):
+        return VideoFile.from_abspath(abspath)
     else:
-        millis = int(1000*duration)
-        att['duration'] = '{mins:02d}:{secs:02d}.{mils:03d}'.format(mins=millis // 60000, secs=millis // 1000, mils=millis % 1000)
-
-    return att
-
-def get_video_attributes(abspath: str)->Dict[str, Any]:
-    att = {}
-    stats = os.stat(abspath)
-    att['size'] = round(stats.st_size / 1_048_576, 1)
-    att['ctime'] = datetime.fromtimestamp(stats.st_ctime).strftime('%d-%b-%Y (%H:%M:%S)')
-    att['atime'] = datetime.fromtimestamp(stats.st_atime).strftime('%d-%b-%Y (%H:%M:%S)')
-    att['mtime'] = datetime.fromtimestamp(stats.st_mtime).strftime('%d-%b-%Y (%H:%M:%S)')
-
-    clip = VideoFileClip(abspath)
-    w, h = clip.size
-
-    att['width'] = w
-    att['height'] = h
-    att['resolution'] = F'{w}x{h}'
-
-    d = int(clip.duration)
-    hours = d // 3_600
-
-    d %= 3_600
-    minutes = d // 60
-
-    d %= 60
-    seconds = d 
-
-    att['duration'] = F'{hours:02d}:{minutes:02d}:{seconds:02d}'
-
-    return att
-
-def get_docs_attributes(abspath: str)->Dict[str, Any]:
-    att = {}
-    stats = os.stat(abspath)
-
-    att['size'] = round(stats.st_size / 1_048_576, 1)
-    att['ctime'] = datetime.fromtimestamp(stats.st_ctime).strftime('%d-%b-%Y (%H:%M:%S)')
-    att['atime'] = datetime.fromtimestamp(stats.st_atime).strftime('%d-%b-%Y (%H:%M:%S)')
-    att['mtime'] = datetime.fromtimestamp(stats.st_mtime).strftime('%d-%b-%Y (%H:%M:%S)')
-
-    return att
+        return AnyFile.from_abspath(abspath)
