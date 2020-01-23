@@ -1,0 +1,84 @@
+{% macro document(abspath, file) -%}
+{% set filepath = '/'|join(arguments) %}
+<div class="card-content">
+    <span class="card-title">{{ file.name }}</span>
+    <ul>
+        <li>Size: {{ file.size|filesizeformat }}</li>
+        <li>Created: {{ file.ctime }}</li>
+    </ul>
+</div>
+
+<div class="row">
+    <a href="{{ url_for('send_file', abspath=abspath+'/'+file.name) }}" download="{{ file.name }}"
+        class="waves-effect waves-light btn"><i class="material-icons right">get_app</i>Download</a>
+
+    <a href="{{ url_for('remove_file', varargs=abspath+'/'+file.name) }}" class="waves-effect red btn"><i
+            class="material-icons">delete</i>Delete</a>
+</div>
+{%- endmacro %}
+
+{% macro audio(abspath, file) -%}
+{% set filepath = '/'|join(arguments) %}
+{% set fileurl = url_for('send_file', filename=filepath) %}
+<i class="material-icons circle blue">play_arrow</i>
+<span class="title">{{ file.name }}</span>
+<p>Duration: {{ file.duration }}<br>
+    Title: {{ file.title }}<br>
+    Size: {{ file.size|filesizeformat }}
+</p>
+<a href="{{ fileurl }}" download="{{ file.name }}" class="secondary-content"></a>
+<audio controls>
+    <source src="{{ fileurl }}" type="{{ file.mime_type() }}">
+</audio>
+<br>
+<a href="{{ url_for('remove_file', filepath=filepath) }}" class="waves-effect red btn"><i
+        class="material-icons right">delete</i>Delete</a>
+{%- endmacro %}
+
+{% macro picture(abspath, file) -%}
+{% set filepath = '/'|join(arguments) %}
+{% set fileurl = url_for('send_file', abspath=filepath) %}
+<div class="card-image">
+    <img class="responsive-img materialboxed" src="{{ fileurl }}">
+</div>
+<div class="card-content">
+    <span class="card-title">{{ file.name }}</span>
+    <ul>
+        <li>Size: {{ file.size }}KB</li>
+        <li>Width: {{ file.width }}</li>
+        <li>Height: {{ file.height }} </li>
+        <li>Created: {{ file.ctime }}</li>
+    </ul>
+    <div class="row">
+        <a href="{{ fileurl }}" download="{{ file.name }}" class="waves-effect waves-light btn"><i
+                class="material-icons right">get_app</i>Download</a>
+
+        <a href="{{ url_for('remove_file', varargs=filepath) }}" class="waves-effect red btn"><i
+                class="material-icons right">delete</i>Delete</a>
+    </div>
+</div>
+{%- endmacro %}
+
+{% macro video(abspath, file) -%}
+{% set filepath = '/'|join(arguments) %}
+{% set fileurl = url_for('send_file', filename=filepath) %}
+<video class="video_player" controls>
+    <source src="{{ fileurl }}">
+</video>
+<div class="card-content">
+    <span class="card-title">{{ file.name }}</span>
+    <ul>
+        <li>Duration: {{ file.duration }}</li>
+        <li>Resolution: {{ file.resolution }}</li>
+        <li>Size: {{ file.size }}MB</li>
+        <li>Created: {{ file.ctime }}</li>
+    </ul>
+    <div class="row">
+        <a href="{{ fileurl }}" download="{{ file.name }}" class="waves-effect waves-light btn"><i
+                class="material-icons right">get_app</i>Download</a>
+
+        <a href="{{ url_for('remove_file', filepath=filepath) }}" class="waves-effect red btn"><i
+                class="material-icons right">delete</i>Delete</a>
+    </div>
+</div>
+{%- endmacro %}
