@@ -151,22 +151,6 @@ def remove_file(varargs: str = ''):
 
     except FileNotFoundError:
         raise wexs.NotFound()
-    
-@app.route('/__pictures__/<path:filename>/')
-def send_imgs(filename):
-    return send_file(IMGS_PATH, filename)
-
-@app.route('/__music__/<path:filename>/')
-def send_audio(filename):
-    return send_file(MUSIC_PATH, filename)
-
-@app.route('/__videos__/<path:filename>')
-def send_video(filename):
-    return send_file(VIDEOS_PATH, filename)
-
-@app.route('/__docs__/<path:filename>')
-def send_docs(filename):
-    return send_file(DOCS_PATH, filename)
 
 @app.route('/__file__/<path:abspath>/')
 def send_file(abspath: str = ''):
