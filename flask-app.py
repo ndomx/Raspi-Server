@@ -23,19 +23,23 @@ def handle_bad_request(e):
 def handle_not_found(e):
     return render_template('error.html', error=HttpError.error404()), 404
 
+@app.route('/')
 @app.route('/<path:varargs>')
-def index(varargs: str = ''):
-    varargs = varargs.strip('/')
+def index(varargs: str = '/'):
+    current = os.path.join(HOME_PATH, varargs)
+    current = os.path.abspath(current)
+
+    varargs = os.fspath(varargs)
+    varargs = varargs.replace('/', os.sep)
+    paths = varargs.split(os.sep)
     
     dirs = []
     files = []
     folder_size = 0
-    folder_path = varargs + '/'
-    current = HOME_PATH + varargs + '/'
 
     try:
         for path in os.listdir(current):
-            abspath = current + path
+            abspath = os.path.join(current, path)
 
             if os.path.isdir(abspath):
                 dirs.append(path)
@@ -45,7 +49,7 @@ def index(varargs: str = ''):
                 folder_size += pathfile.size
                 files.append(pathfile)
 
-        return render_template('index.html', abspath=folder_path, dirs=dirs, files=files)
+        return render_template('index.html', paths=paths, dirs=dirs, files=files)
 
     except FileNotFoundError:
         raise wexs.NotFound() 
@@ -164,8 +168,10 @@ def send_video(filename):
 def send_docs(filename):
     return send_file(DOCS_PATH, filename)
 
-@app.route('/<path:abspath>/')
+@app.route('/__file__/<path:abspath>/')
 def send_file(abspath: str = ''):
+    abspath = os.path.join(HOME_PATH, abspath)
+
     if not os.path.isfile(abspath):
         raise wexs.Forbidden()
 
