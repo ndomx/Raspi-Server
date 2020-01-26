@@ -29,8 +29,7 @@ class _File(ABC):
 
     @property
     def extension(self)->str:
-        index = self.name.rindex('.')
-        return self.name[index::]
+        return os.path.splitext(self.name)[-1]
 
     @property
     @abstractmethod
@@ -54,7 +53,8 @@ class AnyFile(_File):
             raise FileNotFoundError('path not set to directory')
 
         file = AnyFile()
-        file.name = os.path.split(abspath)[-1]
+        #file.name = os.path.split(abspath)[-1]
+        file.name = os.path.basename(abspath)
 
         stats = os.stat(abspath)
         file.size = stats.st_size
@@ -81,7 +81,8 @@ class VideoFile(_File):
             raise FileNotFoundError('path not set to directory')
 
         video = VideoFile()
-        video.name = os.path.split(abspath)[-1]
+        #video.name = os.path.split(abspath)[-1]
+        video.name = os.path.basename(abspath)
 
         stats = os.stat(abspath)
         video.size = stats.st_size
@@ -119,7 +120,8 @@ class AudioFile(_File):
             raise FileNotFoundError('path not set to directory')
 
         audio = AudioFile()
-        audio.name = os.path.split(abspath)[-1]
+        # audio.name = os.path.split(abspath)[-1]
+        audio.name = os.path.basename(abspath)
 
         stats = os.stat(abspath)
         audio.size = stats.st_size
@@ -167,7 +169,8 @@ class PictureFile(_File):
             raise FileNotFoundError('path not set to directory')
 
         img = PictureFile()
-        img.name = os.path.split(abspath)[-1]
+        #img.name = os.path.split(abspath)[-1]
+        img.name = os.path.basename(abspath)
 
         stats = os.stat(abspath)
         img.size = stats.st_size
@@ -184,18 +187,11 @@ class PictureFile(_File):
 
         return img
 
-def _get_extension(abspath: str)->str:
-    filename = os.path.split(abspath)
-    index = filename.rindex('.')
-    return filename[rindex::]
-
 def file_from_abspath(abspath: str)->_File:
     if not os.path.isfile:
         raise FileNotFoundError('path not set to directory')
 
-    filename = os.path.split(abspath)[-1]
-    rindex = filename.rindex('.')
-    ext = filename[rindex::]
+    ext = os.path.splitext(abspath)[-1]
 
     if (ext in PictureFile.extensions):
         return PictureFile.from_abspath(abspath)
