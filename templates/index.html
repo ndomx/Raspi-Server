@@ -32,6 +32,7 @@
         </div>
     </nav>
 
+    {% set abspath = paths|join('/') %}
     <div class="row">
         <div class="col s2">
             <div class="collection with-header">
@@ -47,7 +48,7 @@
         {% import 'files_template.html' as files_templates %}
 
         <div class="col s8">
-            <h5>{{ abspath|last }}</h5>
+            <h5>{{ paths|last|title }}</h5>
             <h6>{{ abspath }}</h6>
             <p>{{ files|length }} files ({{ files|sum(attribute='size')|filesizeformat }})</p>
 
@@ -68,6 +69,12 @@
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            var elems = document.querySelectorAll('.materialboxed');
+            var instances = M.Materialbox.init(elems);
+        })
+    </script>
 
 </body>
 
