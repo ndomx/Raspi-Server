@@ -6,16 +6,16 @@
     <span class="card-title">{{ file.name }}</span>
     <ul>
         <li>Size: {{ file.size|filesizeformat }}</li>
-        <li>Created: {{ file.ctime }}</li>
+        <li>Created: {{ file.ctime }}</li> <!-- TODO: Display in time format -->
     </ul>
 </div>
 
-<div class="row">
+<div class="card-action">
     <a href="{{ fileurl }}" download="{{ file.name }}"
         class="waves-effect waves-light btn"><i class="material-icons right">get_app</i>Download</a>
 
-    <a href="{{ url_for('remove_file', varargs=filepath) }}" class="waves-effect red btn"><i
-            class="material-icons">delete</i>Delete</a>
+    <a href="{{ url_for('remove_file', full_path=filepath) }}" class="waves-effect red btn"><i
+            class="material-icons right">delete</i>Delete</a>
 </div>
 {%- endmacro %}
 
@@ -23,19 +23,23 @@
 {% macro audio(abspath, file) -%}
 {% set filepath = [abspath, file]|join('/') %}
 {% set fileurl = url_for('send_file', abspath=filepath) %}
-<i class="material-icons circle blue">play_arrow</i>
-<span class="title">{{ file.name }}</span>
-<p>Duration: {{ file.duration }}<br>
-    Title: {{ file.title }}<br>
-    Size: {{ file.size|filesizeformat }}
-</p>
-<a href="{{ fileurl }}" download="{{ file.name }}" class="secondary-content"></a>
-<audio controls>
-    <source src="{{ fileurl }}" type="{{ file.mime_type() }}">
-</audio>
-<br>
-<a href="{{ url_for('remove_file', varargs=filepath) }}" class="waves-effect red btn"><i
-        class="material-icons right">delete</i>Delete</a>
+<div class="card-content">
+    <span class="card-title">{{ file.name }}</span>
+    <br>
+    <audio controls>
+        <source src="{{ fileurl }}" type="{{ file.mime_type }}">
+    </audio>
+    <br><br>
+    <p>Duration: {{ file.duration }}<br> <!-- TODO: Display duration in time format -->
+        Title: {{ file.title }}<br> <!-- TODO: Add unspecified to tracks without title -->
+        Size: {{ file.size|filesizeformat }}
+    </p>
+    <div class="card-action">
+        <a href="{{ fileurl }}" download="{{ file.name }}" class="waves-effect waves-light btn"><i class="material-icons right">get_app</i>Download</a>
+        <a href="{{ url_for('remove_file', full_path=filepath) }}" class="waves-effect red btn"><i
+            class="material-icons right">delete</i>Delete</a>
+    </div>
+</div>
 {%- endmacro %}
 
 <!-- PICTURES -->
@@ -51,13 +55,13 @@
         <li>Size: {{ file.size|filesizeformat }}</li>
         <li>Width: {{ file.width }}</li>
         <li>Height: {{ file.height }} </li>
-        <li>Created: {{ file.ctime }}</li>
+        <li>Created: {{ file.ctime }}</li> <!-- TODO: Display in time format -->
     </ul>
-    <div class="row">
+    <div class="card-action">
         <a href="{{ fileurl }}" download="{{ file.name }}" class="waves-effect waves-light btn"><i
                 class="material-icons right">get_app</i>Download</a>
 
-        <a href="{{ url_for('remove_file', varargs=filepath) }}" class="waves-effect red btn"><i
+        <a href="{{ url_for('remove_file', full_path=filepath) }}" class="waves-effect red btn"><i
                 class="material-icons right">delete</i>Delete</a>
     </div>
 </div>
@@ -67,22 +71,22 @@
 {% macro video(abspath, file) -%}
 {% set filepath = [abspath, file]|join('/') %}
 {% set fileurl = url_for('send_file', abspath=filepath) %}
-<video class="video_player" controls>
+<video class="video_player" max-width="400" controls>
     <source src="{{ fileurl }}">
 </video>
 <div class="card-content">
     <span class="card-title">{{ file.name }}</span>
     <ul>
-        <li>Duration: {{ file.duration }}</li>
-        <li>Resolution: {{ file.resolution }}</li>
+        <li>Duration: {{ file.duration }}</li> <!-- TODO: Display duration in time format -->
+        <li>Resolution: {{ file.resolution }}</li> <!-- TODO: Add unspecified to videos without resolution -->
         <li>Size: {{ file.size|filesizeformat }}</li>
-        <li>Created: {{ file.ctime }}</li>
+        <li>Created: {{ file.ctime }}</li> <!-- TODO: Display in time format -->
     </ul>
-    <div class="row">
+    <div class="card-action">
         <a href="{{ fileurl }}" download="{{ file.name }}" class="waves-effect waves-light btn"><i
                 class="material-icons right">get_app</i>Download</a>
 
-        <a href="{{ url_for('remove_file', varargs=filepath) }}" class="waves-effect red btn"><i
+        <a href="{{ url_for('remove_file', full_path=filepath) }}" class="waves-effect red btn"><i
                 class="material-icons right">delete</i>Delete</a>
     </div>
 </div>

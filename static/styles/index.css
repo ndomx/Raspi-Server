@@ -1,43 +1,8 @@
-.sidebar {
-    margin: 0;
-    padding: 0;
-    width: 200px;
-    background-color: steelblue;
-    position: fixed;
-    height: 100%;
-    overflow: auto;
-}
-
-.sidebar a {
+video {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
     display: block;
-    color: white;
-    padding: 16px;
-    text-decoration: none;
-}
-
-.sidebar a:hover:not(.active) {
-    background-color: goldenrod;
-    color: aliceblue;
-}
-
-@media screen and (max-width: 700px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-    }
-    .sidebar a {
-        float: left;
-    }
-
-    div.content {
-        margin-left: 0;
-    }
-}
-
-@media screen and (max-width: 400px) {
-    .sidebar a {
-        text-align: center;
-        float: none;
-    }
 }
