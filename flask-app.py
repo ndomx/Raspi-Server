@@ -13,6 +13,7 @@ app = Flask(__name__)
 
 @app.errorhandler(wexs.Forbidden)
 def handle_forbbiden(e):
+    print(e)
     return 'Forbbiden', 403
 
 @app.errorhandler(wexs.BadRequest)
@@ -45,9 +46,14 @@ def index(varargs: str = '/'):
                 dirs.append(path)
 
             elif os.path.isfile(abspath):
-                pathfile = file_from_abspath(abspath)
-                folder_size += pathfile.size
-                files.append(pathfile)
+                try:
+                    pathfile = file_from_abspath(abspath)
+                except OSError:
+                    continue
+                finally:
+                    folder_size += pathfile.size
+                    files.append(pathfile)
+
 
         return render_template('index.html', paths=paths, dirs=dirs, files=files)
 
@@ -96,19 +102,24 @@ def upload_file(root: str, save_path: str = ''):
 
     raise wexs.BadRequest()
 
-@app.route('/__delete__/<path:varargs>')
-def remove_file(varargs: str = ''):
-    abspath = os.path.join(HOME_PATH, path)
-    parent = os.path.join(abspath, os.pardir)
-    try:
-        if (os.path.isfile(full_path)):
-            os.remove(full_path)
-            return redirect(url_for('index', varargs=abspath))
+@app.route('/__delete__/<path:full_path>')
+def remove_file(full_path: str = ''):
+    abspath = os.path.join(HOME_PATH, full_path)
+    absdir = os.path.split(abspath)[0]
+    parent = os.path.join(absdir, os.pardir)
 
-        elif (os.path.isdir(full_path)):
+    if not (os.path.exists(abspath)):
+        raise wexs.BadRequest()
+
+    try:
+        if (os.path.isfile(abspath)):
+            os.remove(abspath)
+            return redirect(url_for('index', varargs=absdir))
+
+        elif (os.path.isdir(abspath)):
             full_path = full_path.replace('/', os.sep)
 
-            cmd = 'rmdir /Q /S ' + full_path 
+            cmd = 'rmdir /Q /S ' + abspath 
             os.system(cmd)
 
             return redirect(url_for('index', varargs=parent))
@@ -120,37 +131,6 @@ def remove_file(varargs: str = ''):
         raise wexs.Forbidden(e)
 
     raise wexs.BadRequest()
-
-
-    varargs = varargs.strip('/')
-
-    dirs = []
-    files = []
-    folder_size = 0
-    folder_path = MUSIC_PATH
-    current = ''
-
-    if (varargs != ''):
-        current = varargs + '/'
-        folder_path = MUSIC_PATH + current
-
-    try:
-        for path in os.listdir(folder_path):
-            abspath = folder_path + path
-            if (os.path.isdir(abspath)):
-                dirs.append({'relative': path, 'url': current + path})
-            elif (os.path.isfile(abspath)):
-                if (is_valid_format(path, FileType.AUDIO)):
-                    atts = get_audio_attributes(abspath)
-                    atts['name'] = path
-                    files.append(atts)
-
-                    folder_size += atts['size']
-
-        return render_template('audio.html', dirs=dirs, files=files, folder_size=folder_size, current=current)
-
-    except FileNotFoundError:
-        raise wexs.NotFound()
 
 @app.route('/__file__/<path:abspath>/')
 def send_file(abspath: str = ''):
