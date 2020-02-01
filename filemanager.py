@@ -45,6 +45,7 @@ class _File(ABC):
         return self.name
 
 class AnyFile(_File):
+    @property
     def mime_type(self)->str:
         return 'text/plain'
 
@@ -73,8 +74,10 @@ class VideoFile(_File):
     filetype = FileType.VIDEO
     extensions = ['.mp4', '.webm', '.ogg']
 
+    @property
     def mime_type(self)->str:
-        return F'video/{self.extension}'
+        ext = self.extension.strip('.')
+        return F'video/{ext}'
 
     def from_abspath(abspath: str)->_File:
         if not os.path.isfile:
@@ -108,12 +111,14 @@ class AudioFile(_File):
 
     filetype = FileType.AUDIO
     extensions = [
-        '.wav', '.mp3', '.mp4',
+        '.wav', '.mp3',
         '.aac', '.ogg', '.flac'
     ]
 
+    @property
     def mime_type(self)->str:
-        return F'audio/{self.extension}'
+        ext = self.extension.strip('.')
+        return F'audio/{ext}'
 
     def from_abspath(abspath: str)->_File:
         if not os.path.isfile:
@@ -151,6 +156,7 @@ class PictureFile(_File):
         '.tiff', '.tif', '.webp', '.xbm' 
     ]
 
+    @property
     def mime_type(self)->str:
         ext = ''
         if (self.extension == '.apng'):
@@ -160,7 +166,7 @@ class PictureFile(_File):
         elif (self.extension == '.tiff'):
             ext = 'tif'
         else:
-            ext = self.extension
+            ext = self.extension.strip('.')
 
         return F'image/{ext}'
 
