@@ -18,6 +18,9 @@
 
     <!-- jQuery -->
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
+
+    <!-- Custom stlylesheet -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='styles/index.css') }}">
 </head>
 
 <body>
@@ -42,7 +45,7 @@
                 <a href="{{ url_for('index', varargs=abspath + '/' + folder) }}" class="collection-item">{{ folder }}</a>
                 {% endfor %}
             </div>
-            <a href="{{ url_for('remove_file', varargs=abspath) }}" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete this directory</a>
+            <a href="{{ url_for('remove_file', full_path=abspath) }}" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete this directory</a>
         </div>
 
         {% import 'files_template.html' as files_templates %}
