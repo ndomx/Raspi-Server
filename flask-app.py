@@ -105,7 +105,7 @@ def upload_file(root: str, save_path: str = ''):
 @app.route('/__delete__/<path:full_path>')
 def remove_file(full_path: str = ''):
     abspath = os.path.join(HOME_PATH, full_path)
-    absdir = os.path.split(abspath)[0]
+    absdir = os.path.dirname(abspath)
     parent = os.path.join(absdir, os.pardir)
 
     if not (os.path.exists(abspath)):
