@@ -60,8 +60,6 @@ def index(varargs: str = '/'):
     except FileNotFoundError:
         raise wexs.NotFound() 
 
-@app.route('/__parent__')
-@app.route('/__parent__/')
 @app.route('/__parent__/<path:varargs>')
 def find_parent(varargs: str = ''):
     if (varargs == ''):
@@ -105,22 +103,32 @@ def upload_file(root: str, save_path: str = ''):
 @app.route('/__delete__/<path:full_path>')
 def remove_file(full_path: str = ''):
     abspath = os.path.join(HOME_PATH, full_path)
-    absdir = os.path.dirname(abspath)
-    parent = os.path.join(absdir, os.pardir)
 
     if not (os.path.exists(abspath)):
         raise wexs.BadRequest()
 
     try:
         if (os.path.isfile(abspath)):
+            absdir = os.path.dirname(full_path)
             os.remove(abspath)
             return redirect(url_for('index', varargs=absdir))
 
         elif (os.path.isdir(abspath)):
-            full_path = full_path.replace('/', os.sep)
+            abspath = abspath.replace('/', os.sep)
 
-            cmd = 'rmdir /Q /S ' + abspath 
-            os.system(cmd)
+            cmd = f'rmdir /Q /S "{abspath}"'
+            code = os.system(cmd)
+
+            if code != 0:
+                raise TypeError(f'''
+                    Error running command
+                    > {cmd}
+                    Command returned error code {code}
+                    Folder was not deleted
+                ''')
+
+            parent = os.path.join(full_path, os.pardir)
+            parent = os.path.normpath(parent)
 
             return redirect(url_for('index', varargs=parent))
 
@@ -130,7 +138,10 @@ def remove_file(full_path: str = ''):
     except OSError as e:
         raise wexs.Forbidden(e)
 
-    raise wexs.BadRequest()
+    except TypeError as e:
+        raise wexs.BadRequest(e)
+
+    raise wexs.BadRequest('Unknown error!')
 
 @app.route('/__file__/<path:abspath>/')
 def send_file(abspath: str = ''):
