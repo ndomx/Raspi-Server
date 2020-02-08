@@ -28,12 +28,34 @@
         <div class="nav-wrapper">
             <a href="#!" class="brand-logo left">2331A</a>
             <ul class="right hide-on-med-and-down">
-                <li><a href="#!"><i class="material-icons left">cloud_upload</i>Upload file</a></li>
+                <li><a class="modal-trigger" href="#imodal"><i class="material-icons left">cloud_upload</i>Upload file</a></li>
                 <li><a class="dropdown-trigger" href="#!" data-target="dropdown1">Filter<i class="material-icons right">sort</i></a></li>
                 <li><a href="#!"><i class="material-icons left">help_outline</i>About</a></li>
             </ul>
         </div>
     </nav>
+
+    <div class="modal" id="imodal">
+        <div class="modal-content">
+            <form method="post" enctype="multipart/form-data">
+                <div class="file-field input-field">
+                    <div class="btn">
+                        <span>File</span>
+                        <input type="file" name="file" id="file-input">
+                    </div>
+                    <div class="file-path-wrapper">
+                        <input type="text" class="file-path validate">
+                    </div>
+                    <div class="input-field col s12">
+                        <input type="text" class="validate" id="new-filename" name="filename">
+                        <label for="new-filename">Filename</label>
+                        <span class="helper-text">The file will be saved with this name</span>
+                    </div>
+                </div>
+                <input type="submit" class="waves-effect white btn" value="Upload">
+            </form>
+        </div>
+    </div>
 
     {% set abspath = paths|join('/') %}
     <div class="row">
@@ -74,8 +96,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            var elems = document.querySelectorAll('.materialboxed');
-            var instances = M.Materialbox.init(elems);
+            var elems = document.querySelectorAll('.modal');
+            var instances = M.Modal.init(elems);
         })
     </script>
 

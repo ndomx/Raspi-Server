@@ -73,33 +73,6 @@ def find_parent(varargs: str = ''):
 
     return redirect(url_for('index', varargs=new_path))
 
-def upload_file(root: str, save_path: str = ''):
-    if ('file' not in request.files):
-        # flash('No file part')
-        return redirect(request.url)
-    
-    upload = request.files['file']
-    if (upload.filename == ''):
-        # flash('No selected file')
-        return redirect(request.url)
-
-    full_path = os.path.join(root, save_path)
-    if (upload and is_valid_format(upload.filename, FileType.ANY)):
-        if ('filename' in request.form.keys()):
-            if (request.form['filename'] == ''):
-                filename = secure_filename(upload.filename)
-            else:
-                ext = get_file_extension(upload.filename)
-                filename = secure_filename(request.form['filename'] + ext)
-        else:
-            filename = secure_filename(upload.filename)
-
-        assert filename != ''   
-        upload.save(os.path.join(full_path, filename))
-        return redirect(request.url)
-
-    raise wexs.BadRequest()
-
 @app.route('/__delete__/<path:full_path>')
 def remove_file(full_path: str = ''):
     abspath = os.path.join(HOME_PATH, full_path)
@@ -119,13 +92,7 @@ def remove_file(full_path: str = ''):
             cmd = f'rmdir /Q /S "{abspath}"'
             code = os.system(cmd)
 
-            if code != 0:
-                raise TypeError(f'''
-                    Error running command
-                    > {cmd}
-                    Command returned error code {code}
-                    Folder was not deleted
-                ''')
+            assert code == 0, f'Process returned with code {code}. Failed to remove folder'
 
             parent = os.path.join(full_path, os.pardir)
             parent = os.path.normpath(parent)
@@ -138,7 +105,7 @@ def remove_file(full_path: str = ''):
     except OSError as e:
         raise wexs.Forbidden(e)
 
-    except TypeError as e:
+    except AssertionError as e:
         raise wexs.BadRequest(e)
 
     raise wexs.BadRequest('Unknown error!')
@@ -152,6 +119,38 @@ def send_file(abspath: str = ''):
 
     path, filename = os.path.split(abspath)
     return send_from_directory(path, filename)
+
+@app.route('/<path:save_path>', methods=['POST'])
+def upload_file(save_path: str = ''):
+    try:
+        assert 'file' in request.files, 'No file part'
+
+        upload = request.files['file']
+        assert upload, 'Whoops, could get file!'
+
+        filename = ''
+        if 'filename' in request.form.keys():
+            if request.form['filename'] == '':
+                filename = secure_filename(upload.filename)
+            else:
+                ext = os.path.splitext(upload.filename)[-1]
+                filename = secure_filename(request.form['filename'] + ext)
+
+        else:
+            filename = secure_filename(upload.filename)
+
+        assert filename != '', 'File cannot have empty name'
+
+        folder_path = os.path.join(HOME_PATH, save_path)
+        abspath = os.path.join(folder_path, filename)
+        assert not os.path.exists(abspath), 'Cannot overwrite existing files'
+
+        upload.save(abspath)
+        return redirect(request.url)
+
+    except AssertionError as e:
+        # TODO: Add logic to assertion errors
+        raise wexs.BadRequest(e)
 
 if (__name__ == '__main__'):
     if (len(sys.argv) == 1 or sys.argv[1] == 'debug'):
