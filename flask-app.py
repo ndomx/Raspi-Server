@@ -13,7 +13,6 @@ app = Flask(__name__)
 
 @app.errorhandler(wexs.Forbidden)
 def handle_forbbiden(e):
-    print(e)
     return 'Forbbiden', 403
 
 @app.errorhandler(wexs.BadRequest)
@@ -60,6 +59,8 @@ def index(varargs: str = '/'):
     except FileNotFoundError:
         raise wexs.NotFound() 
 
+@app.route('/__parent__')
+@app.route('/__parent__/')
 @app.route('/__parent__/<path:varargs>')
 def find_parent(varargs: str = ''):
     if (varargs == ''):
