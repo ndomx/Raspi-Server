@@ -14,8 +14,7 @@
     <a href="{{ fileurl }}" download="{{ file.name }}"
         class="waves-effect waves-light btn"><i class="material-icons right">get_app</i>Download</a>
 
-    <a href="{{ url_for('remove_file', full_path=filepath) }}" class="waves-effect red btn"><i
-            class="material-icons right">delete</i>Delete</a>
+    <button onclick="deleteFile('{{ filepath }}')" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete</a>
 </div>
 {%- endmacro %}
 
@@ -36,8 +35,7 @@
     </p>
     <div class="card-action">
         <a href="{{ fileurl }}" download="{{ file.name }}" class="waves-effect waves-light btn"><i class="material-icons right">get_app</i>Download</a>
-        <a href="{{ url_for('remove_file', full_path=filepath) }}" class="waves-effect red btn"><i
-            class="material-icons right">delete</i>Delete</a>
+        <button onclick="deleteFile('{{ filepath }}')" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete</a>
     </div>
 </div>
 {%- endmacro %}
@@ -61,8 +59,7 @@
         <a href="{{ fileurl }}" download="{{ file.name }}" class="waves-effect waves-light btn"><i
                 class="material-icons right">get_app</i>Download</a>
 
-        <a href="{{ url_for('remove_file', full_path=filepath) }}" class="waves-effect red btn"><i
-                class="material-icons right">delete</i>Delete</a>
+        <button onclick="deleteFile('{{ filepath }}')" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete</a>
     </div>
 </div>
 {%- endmacro %}
@@ -86,8 +83,7 @@
         <a href="{{ fileurl }}" download="{{ file.name }}" class="waves-effect waves-light btn"><i
                 class="material-icons right">get_app</i>Download</a>
 
-        <a href="{{ url_for('remove_file', full_path=filepath) }}" class="waves-effect red btn"><i
-                class="material-icons right">delete</i>Delete</a>
+        <button onclick="deleteFile('{{ filepath }}')" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete</a>
     </div>
 </div>
 {%- endmacro %}

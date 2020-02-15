@@ -20,7 +20,10 @@
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
 
     <!-- Custom stlylesheet -->
-	<link rel="stylesheet" href="{{ url_for('static', filename='styles/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/index.css') }}">
+
+    <!-- Custom scripts -->
+    <script src="{{ url_for('static', filename='scripts/misc.js') }}"></script>
 </head>
 
 <body>
@@ -28,14 +31,14 @@
         <div class="nav-wrapper">
             <a href="#!" class="brand-logo left">2331A</a>
             <ul class="right hide-on-med-and-down">
-                <li><a class="modal-trigger" href="#imodal"><i class="material-icons left">cloud_upload</i>Upload file</a></li>
+                <li><a class="modal-trigger" href="#uploads-modal"><i class="material-icons left">cloud_upload</i>Upload file</a></li>
                 <li><a class="dropdown-trigger" href="#!" data-target="dropdown1">Filter<i class="material-icons right">sort</i></a></li>
-                <li><a href="#!"><i class="material-icons left">help_outline</i>About</a></li>
+                <li><a class="modal-trigger" href="#about-modal"><i class="material-icons left">help_outline</i>About</a></li>
             </ul>
         </div>
     </nav>
 
-    <div class="modal" id="imodal">
+    <div class="modal" id="uploads-modal">
         <div class="modal-content">
             <form method="post" enctype="multipart/form-data">
                 <div class="file-field input-field">
@@ -57,17 +60,30 @@
         </div>
     </div>
 
+    <div class="modal" id="about-modal">
+        <div class="modal-content">
+            <h4>About this project</h4> <!-- TODO: give project a name -->
+            <p>Talk about stuff</p> <!-- TODO: add proper description -->
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Ok</a>
+        </div>
+    </div>
+
     {% set abspath = paths|join('/') %}
+    {% set parent = url_for('find_parent', varargs=abspath.strip('/')) %}
     <div class="row">
         <div class="col s2">
             <div class="collection with-header">
-                <a href="{{ url_for('find_parent', varargs=abspath.strip('/')) }}" class="collection-item active">Go back</a>
+                <a href="{{ parent }}" class="collection-item active">Go back</a>
 
                 {% for folder in dirs %}
                 <a href="{{ url_for('index', varargs=abspath + '/' + folder) }}" class="collection-item">{{ folder }}</a>
                 {% endfor %}
             </div>
-            <a href="{{ url_for('remove_file', full_path=abspath) }}" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete directory</a>
+            <button onclick="deleteDirectory('{{ abspath }}')" class="waves-effect red btn"><i class="material-icons right">delete</i>Delete directory</button>
+            <br><br>
+            <button class="waves-effect btn">Create directory</button>
         </div>
 
         {% import 'files_template.html' as files_templates %}
