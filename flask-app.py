@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from filemanager import FileType, AnyFile, VideoFile, AudioFile, PictureFile, file_from_abspath
 from http_errors import HttpError
 
-HOME_PATH = 'D:' + os.sep
+HOME_PATH = '/home/pi' + os.sep
 
 app = Flask(__name__)
 
