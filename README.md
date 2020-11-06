@@ -1,7 +1,7 @@
 # Raspi-Server
 Raspi-Server is a local cloud file hosting program, that exposes the RPi filesystem to the local network.
 
-The app was made using Flask and raw HTML, with most of the CSS provded by [Materialize](https://materializecss.com/).
+The app was made using [Flask](https://flask.palletsprojects.com/en/1.1.x/) and raw HTML, with most of the CSS provded by [Materialize](https://materializecss.com/).
 
 ## Usage
 Install the required dependencies:
