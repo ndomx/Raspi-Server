@@ -1,5 +1,5 @@
 # Raspi-Server
-Raspi-Server is a local cloud file hosting program, that exposes the RPi filesystem to the local network. You can upload and download files. The app also support media files, and they can be reproduced without having to download them.
+Raspi-Server is a local cloud file hosting program for Raspberry Pi, that exposes its filesystem to the local network. You can upload and download files. The app also support media files, and they can be reproduced without having to download them.
 
 The app was made using [Flask](https://flask.palletsprojects.com/en/1.1.x/) and raw HTML, with most of the CSS provded by [Materialize](https://materializecss.com/).
 
